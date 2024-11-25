@@ -3,6 +3,7 @@ use rcli::{process_csv, process_genpass, Opts, SubCommand};
 
 // rcli csv -i input.csv -o output.csv --header -d ','
 // cargo run -- csv -i assets/juventus.csv --format yaml
+// cargo run -- genpass
 
 fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
