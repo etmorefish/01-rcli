@@ -14,6 +14,39 @@ pub enum SubCommand {
 
     #[command(name = "genpass", about = "Generate a random password")]
     GenPass(GenPassOpts),
+
+    #[command(subcommand)]
+    Base64(Base64SubCommand),
+}
+
+#[derive(Debug, Parser)]
+pub enum Base64SubCommand {
+    #[command(name = "encode", about = "Encode a string to base64")]
+    Encode(Base64EncodeOpts),
+
+    #[command(name = "decode", about = "Decode a base64 string")]
+    Decode(Base64DecodeOpts),
+}
+
+#[derive(Debug, Parser)]
+pub struct Base64EncodeOpts {
+    #[arg(short, long, value_parser = verify_input_file, default_value = "-")]
+    pub input: String,
+    #[arg(long, value_parser = parse_base64_format, default_value = "standard")]
+    pub format: Base64Format,
+}
+#[derive(Debug, Parser)]
+pub struct Base64DecodeOpts {
+    #[arg(short, long, value_parser = verify_input_file, default_value = "-")]
+    pub input: String,
+    #[arg(long, value_parser = parse_base64_format, default_value = "standard")]
+    pub format: Base64Format,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Base64Format {
+    Standard,
+    UrlSafe,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -72,6 +105,14 @@ pub fn parse_format(format: &str) -> Result<OutputFormat, &'static str> {
         "json" => Ok(OutputFormat::Json),
         "yaml" => Ok(OutputFormat::Yaml),
         // "toml" => Ok(OutputFormat::Toml),
+        _ => Err("Invalid format"),
+    }
+}
+
+pub fn parse_base64_format(format: &str) -> Result<Base64Format, &'static str> {
+    match format {
+        "standard" => Ok(Base64Format::Standard),
+        "urlsafe" => Ok(Base64Format::UrlSafe),
         _ => Err("Invalid format"),
     }
 }
