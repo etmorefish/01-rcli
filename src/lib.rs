@@ -1,5 +1,5 @@
 mod opts;
-pub use opts::{Opts, SubCommand};
+pub use opts::{Base64SubCommand, Opts, SubCommand};
 
 mod process;
 

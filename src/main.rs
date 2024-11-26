@@ -1,9 +1,14 @@
 use clap::Parser;
-use rcli::{process_csv, process_genpass, Opts, SubCommand};
+use rcli::{
+    process_csv, process_decode, process_encode, process_genpass, Base64SubCommand, Opts,
+    SubCommand,
+};
 
 // rcli csv -i input.csv -o output.csv --header -d ','
 // cargo run -- csv -i assets/juventus.csv --format yaml
 // cargo run -- genpass
+// cargo run -- base64 encode --input cargo.toml --format standard
+// cargo run -- base64 decode --input assets/b64.txt --format urlsafe
 
 fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
@@ -27,6 +32,16 @@ fn main() -> anyhow::Result<()> {
                 opts.symbol,
             )?;
         }
+        SubCommand::Base64(subcmd) => match subcmd {
+            Base64SubCommand::Encode(opts) => {
+                println!("{:?}", opts.format);
+                process_encode(&opts.input, opts.format)?;
+            }
+            Base64SubCommand::Decode(opts) => {
+                println!("{:?}", opts.format);
+                process_decode(&opts.input, opts.format)?;
+            }
+        },
     }
     Ok(())
 }
