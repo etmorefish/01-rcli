@@ -1,5 +1,5 @@
 use rand::seq::SliceRandom;
-
+use zxcvbn::zxcvbn;
 const UPPER: &[u8] = b"ABCDEFGHJKLMNPQRSTUVWXYZ"; // 大写字母（去除容易混淆的字母）
 const LOWER: &[u8] = b"abcdefghijkmnopqrstuvwxyz"; // 小写字母（去除容易混淆的字母）
 const NUMBER: &[u8] = b"123456789"; // 数字（去除0）
@@ -43,10 +43,10 @@ pub fn process_genpass(
     }
 
     // 计算剩余的密码长度
-    let remaining_length  = if length as usize >= password.len(){
+    let remaining_length = if length as usize >= password.len() {
         length as usize - password.len()
-    } else{
-        return Err(anyhow::anyhow!("密码长度必须大于已选择的字符类型数量"))
+    } else {
+        return Err(anyhow::anyhow!("密码长度必须大于已选择的字符类型数量"));
     };
     if remaining_length > 0 {
         for _ in 0..remaining_length {
@@ -59,7 +59,11 @@ pub fn process_genpass(
 
     password.shuffle(&mut rng);
 
-    println!("Password: {}", String::from_utf8(password)?);
+    let passwd = String::from_utf8(password)?;
+    println!("Password: {}", passwd);
+
+    let estimate = zxcvbn(&passwd, &[]);
+    println!("Password strength: {}", estimate.score()); // 3
 
     Ok(())
 }
