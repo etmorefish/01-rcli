@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read};
 
-use crate::opts::Base64Format;
+use crate::Base64Format;
 use anyhow::Result;
 use base64::{
     engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD},
