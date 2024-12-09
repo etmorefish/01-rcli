@@ -1,18 +1,26 @@
 use clap::Parser;
 use rcli::{
-    process_csv, process_decode, process_encode, process_genpass, Base64SubCommand, Opts,
-    SubCommand,
+    process_csv, process_decode, process_encode, process_genpass, process_http_serve,
+    Base64SubCommand, HttpSubCommand, Opts, SubCommand,
 };
+use tracing::info;
 
-// rcli csv -i input.csv -o output.csv --header -d ','
-// cargo run -- csv -i assets/juventus.csv --format yaml
-// cargo run -- genpass
-// cargo run -- base64 encode --input cargo.toml --format standard
-// cargo run -- base64 decode --input assets/b64.txt --format urlsafe
+/// rcli csv -i input.csv -o output.csv --header -d ','
+/// cargo run -- csv -i assets/juventus.csv --format yaml
+/// cargo run -- genpass
+/// cargo run -- base64 encode --input cargo.toml --format standard
+/// cargo run -- base64 decode --input assets/b64.txt --format urlsafe
+/// cargo run -- http serve --dir assets --port 3000
+/// $Env:RUST_LOG="info"
 
-fn main() -> anyhow::Result<()> {
+// fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt::init();
+    info!("Starting rcli");
+
     let opts = Opts::parse();
-    println!("{:?}", opts);
+    info!("{:?}", opts);
     match opts.cmd {
         SubCommand::Csv(opts) => {
             let output = if let Some(output) = opts.output {
@@ -23,7 +31,6 @@ fn main() -> anyhow::Result<()> {
             process_csv(&opts.input, output, opts.format)?;
         }
         SubCommand::GenPass(opts) => {
-            // println!("{}", opts)
             process_genpass(
                 opts.length,
                 opts.uppercase,
@@ -34,12 +41,15 @@ fn main() -> anyhow::Result<()> {
         }
         SubCommand::Base64(subcmd) => match subcmd {
             Base64SubCommand::Encode(opts) => {
-                println!("{:?}", opts.format);
                 process_encode(&opts.input, opts.format)?;
             }
             Base64SubCommand::Decode(opts) => {
-                println!("{:?}", opts.format);
                 process_decode(&opts.input, opts.format)?;
+            }
+        },
+        SubCommand::Http(cmd) => match cmd {
+            HttpSubCommand::Serve(opts) => {
+                process_http_serve(opts.dir, opts.port).await?;
             }
         },
     }
